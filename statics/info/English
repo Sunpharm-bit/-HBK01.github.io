@@ -1,0 +1,122 @@
+{
+  "quality": {
+    "phonetic": "ˈkwɒləti",
+    "definitions": [
+      {
+        "pos": "n.",
+        "meaning": "质量；品质；特性",
+        "example": "We need to improve the quality of our products. 我们需要提高产品质量。"
+      }
+    ]
+  },
+  "analysis": {
+    "phonetic": "əˈnæləsɪs",
+    "definitions": [
+      {
+        "pos": "n.",
+        "meaning": "分析；解析",
+        "example": "The lab is conducting chemical analysis. 实验室正在进行化学分析。"
+      }
+    ]
+  },
+  "laboratory": {
+    "phonetic": "ləˈbɒrətri",
+    "definitions": [
+      {
+        "pos": "n.",
+        "meaning": "实验室；化验室",
+        "example": "All samples are tested in the laboratory. 所有样品都在实验室进行测试。"
+      }
+    ]
+  },
+  "instrument": {
+    "phonetic": "ˈɪnstrəmənt",
+    "definitions": [
+      {
+        "pos": "n.",
+        "meaning": "仪器；工具",
+        "example": "This instrument is used for precise measurement. 这个仪器用于精确测量。"
+      }
+    ]
+  },
+  "calibration": {
+    "phonetic": "ˌkælɪˈbreɪʃn",
+    "definitions": [
+      {
+        "pos": "n.",
+        "meaning": "校准；标定",
+        "example": "Regular calibration ensures accurate results. 定期校准确保结果准确。"
+      }
+    ]
+  },
+  "sample": {
+    "phonetic": "ˈsɑːmpl",
+    "definitions": [
+      {
+        "pos": "n.",
+        "meaning": "样品；样本",
+        "example": "Please submit the sample for testing. 请提交样品进行测试。"
+      }
+    ]
+  },
+  "standard": {
+    "phonetic": "ˈstændəd",
+    "definitions": [
+      {
+        "pos": "n.",
+        "meaning": "标准；规格",
+        "example": "This product meets international standards. 这个产品符合国际标准。"
+      }
+    ]
+  },
+  "specification": {
+    "phonetic": "ˌspesɪfɪˈkeɪʃn",
+    "definitions": [
+      {
+        "pos": "n.",
+        "meaning": "规格；说明书",
+        "example": "Please refer to the technical specification. 请参考技术规格书。"
+      }
+    ]
+  },
+  "procedure": {
+    "phonetic": "prəˈsiːdʒə(r)",
+    "definitions": [
+      {
+        "pos": "n.",
+        "meaning": "程序；步骤",
+        "example": "Follow the standard operating procedure. 遵循标准操作程序。"
+      }
+    ]
+  },
+  "validation": {
+    "phonetic": "ˌvælɪˈdeɪʃn",
+    "definitions": [
+      {
+        "pos": "n.",
+        "meaning": "验证；确认",
+        "example": "Method validation is required before use. 使用前需要进行方法验证。"
+      }
+    ]
+  },
+  "accuracy": {
+    "phonetic": "ˈækjərəsi",
+    "definitions": [
+      {
+        "pos": "n.",
+        "meaning": "准确性；精确度",
+        "example": "The instrument has high accuracy. 这个仪器具有高精度。"
+      }
+    ]
+  },
+  "precision": {
+    "phonetic": "prɪˈsɪʒn",
+    "definitions": [
+      {
+        "pos": "n.",
+        "meaning": "精密度；精确性",
+        "example": "Precision is critical in analytical work. 在分析工作中精密度至关重要。"
+      }
+    ]
+  }
+}
