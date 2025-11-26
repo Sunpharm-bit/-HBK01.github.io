@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英语翻译工具 - 质量部分析室II</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            z-index: 1;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .content {
+            padding: 30px 25px;
+        }
+        
+        .section-title {
+            font-size: 22px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #eaecef;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 80px;
+            height: 2px;
+            background: #3498db;
+        }
+        
+        .search-box {
+            display: flex;
+            margin-bottom: 25px;
+            gap: 10px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .search-input:focus {
+            border-color: #3498db;
+        }
+        
+        .search-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        
+        .search-btn:hover {
+            background: #2980b9;
+        }
+        
+        .translation-result {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            display: none;
+        }
+        
+        .translation-result.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .word-title {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .phonetic {
+            color: #7f8c8d;
+            font-size: 16px;
+            font-style: italic;
+        }
+        
+        .definition-list {
+            margin-bottom: 20px;
+        }
+        
+        .definition-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .definition-item:last-child {
+            border-bottom: none;
+        }
+        
+        .pos {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+        
+        .meaning {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .example {
+            margin-top: 8px;
+            padding-left: 15px;
+            border-left: 3px solid #e74c3c;
+            font-style: italic;
+            color: #555;
+        }
+        
+        .no-result {
+            text-align: center;
+            padding: 40px 20px;
+            color: #7f8c8d;
+            font-size: 18px;
+        }
+        
+        .history-section {
+            margin-top: 30px;
+        }
+        
+        .history-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .history-item {
+            background: white;
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .history-item:hover {
+            border-color: #3498db;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #666;
+            margin-top: 30px;
+            border-top: 1px solid #eaeaea;
+            font-size: 14px;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: #2980b9;
+        }
+        
+        @media (max-width: 768px) {
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .search-btn {
+                padding: 12px;
+            }
+            
+            .history-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <h1>英语翻译工具</h1>
+                <p>专业术语翻译与词汇查询</p>
+            </div>
+        </div>
+        
+        <div class="content">
+            <h2 class="section-title">词汇查询</h2>
+            
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="输入英文或中文词汇..." id="searchInput">
+                <button class="search-btn" id="searchBtn">查询</button>
+            </div>
+            
+            <div class="translation-result" id="translationResult">
+                <!-- 翻译结果将动态填充 -->
+            </div>
+            
+            <div class="history-section">
+                <h2 class="section-title">常用实验室词汇</h2>
+                <div class="history-list" id="historyList">
+                    <!-- 常用词汇将动态填充 -->
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="../index.html" class="back-btn">返回主页面</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>为实验室质量控制提升效率，仅限内部使用，勿传播</p>
+        </div>
+    </div>
+
+    <script>
+        // 加载词汇数据
+        let englishData = {};
+        
+        // 从JSON文件加载数据
+        fetch('../info/English.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('网络响应不正常');
+                }
+                return response.json();
+            })
+            .then(data => {
+                englishData = data;
+                // 初始化常用词汇列表
+                initHistoryList();
+            })
+            .catch(error => {
+                console.error('加载词汇数据失败:', error);
+                document.getElementById('translationResult').innerHTML = 
+                    '<div class="no-result">词汇数据加载失败，请检查网络连接或文件路径</div>';
+            });
+        
+        // 初始化常用词汇列表
+        function initHistoryList() {
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+            
+            // 获取前10个词汇作为常用词汇
+            const commonWords = Object.keys(englishData).slice(0, 10);
+            
+            commonWords.forEach(word => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.textContent = word;
+                item.addEventListener('click', () => {
+                    document.getElementById('searchInput').value = word;
+                    searchWord(word);
+                });
+                historyList.appendChild(item);
+            });
+        }
+        
+        // 查询词汇
+        function searchWord(word) {
+            const result = englishData[word.toLowerCase()];
+            const resultElement = document.getElementById('translationResult');
+            
+            if (result) {
+                let html = `
+                    <div class="word-title">
+                        ${word}
+                        ${result.phonetic ? `<span class="phonetic">/${result.phonetic}/</span>` : ''}
+                    </div>
+                    <div class="definition-list">
+                `;
+                
+                result.definitions.forEach((def, index) => {
+                    html += `
+                        <div class="definition-item">
+                            <span class="pos">${def.pos}</span>
+                            <span class="meaning">${def.meaning}</span>
+                            ${def.example ? `<div class="example">${def.example}</div>` : ''}
+                        </div>
+                    `;
+                });
+                
+                html += `</div>`;
+                resultElement.innerHTML = html;
+                resultElement.classList.add('active');
+            } else {
+                resultElement.innerHTML = '<div class="no-result">未找到相关词汇</div>';
+                resultElement.classList.add('active');
+            }
+        }
+        
+        // 事件监听
+        document.getElementById('searchBtn').addEventListener('click', () => {
+            const word = document.getElementById('searchInput').value.trim();
+            if (word) {
+                searchWord(word);
+            }
+        });
+        
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const word = document.getElementById('searchInput').value.trim();
+                if (word) {
+                    searchWord(word);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
