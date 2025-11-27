@@ -1,1 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
 
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>色谱柱查询系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c80ff;
+            --primary-dark: #1a6de0;
+            --secondary-color: #6c757d;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --border-color: #dee2e6;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+            --hplc-color: #4CAF50;
+            --gc-color: #FF9800;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background-color: #f5f7fa;
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .header p {
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 15px 20px;
+            background-color: white;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--secondary-color);
+        }
+
+        .tab:first-child {
+            border-right: 1px solid var(--border-color);
+        }
+
+        .tab.active {
+            color: white;
+        }
+
+        .tab.hplc.active {
+            background-color: var(--hplc-color);
+        }
+
+        .tab.gc.active {
+            background-color: var(--gc-color);
+        }
+
+        .selector-container {
+            position: relative;
+            margin-bottom: 30px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        select {
+            width: 100%;
+            height: 50px;
+            padding: 0 20px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--box-shadow);
+            -moz-appearance: none;
+            -webkit-appearance: none;
+            appearance: none;
+            padding-right: 50px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(44, 128, 255, 0.2);
+        }
+
+        .selector-container::after {
+            content: "\f078";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary-color);
+            pointer-events: none;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 30px;
+            min-height: 400px;
+            transition: var(--transition);
+        }
+
+        .tips {
+            text-align: center;
+            color: var(--secondary-color);
+            padding: 40px 20px;
+            line-height: 1.8;
+        }
+
+        .tips i {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: var(--secondary-color);
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(44, 128, 255, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .column-details {
+            line-height: 1.7;
+        }
+
+        .column-details h2 {
+            color: var(--primary-dark);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .detail-item {
+            display: flex;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            min-width: 100px;
+            color: var(--secondary-color);
+        }
+
+        .detail-value {
+            flex: 1;
+        }
+
+        .column-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .column-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .column-card:hover {
+            box-shadow: var(--box-shadow);
+            transform: translateY(-5px);
+        }
+
+        .column-card.hplc {
+            border-left: 4px solid var(--hplc-color);
+        }
+
+        .column-card.gc {
+            border-left: 4px solid var(--gc-color);
+        }
+
+        .column-card h3 {
+            margin-bottom: 10px;
+            color: var(--primary-dark);
+        }
+
+        .column-card p {
+            margin-bottom: 5px;
+            color: var(--secondary-color);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .column-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            select {
+                height: 45px;
+                font-size: 0.95rem;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+
+<body>
+    <div class="header">
+        <h1><i class="fas fa-vial"></i> 色谱柱查询系统</h1>
+        <p>快速查询液相色谱柱(HPLC)和气相色谱柱(GC)信息</p>
+    </div>
+    
+    <div class="tabs">
+        <button class="tab hplc active" data-type="hplc">液相色谱柱 (HPLC)</button>
+        <button class="tab gc" data-type="gc">气相色谱柱 (GC)</button>
+    </div>
+    
+    <div class="selector-container">
+        <select name="selector" id="selector">
+            <option value='null' selected>请选择色谱柱型号</option>
+        </select>
+    </div>
+    
+    <div class="card" id="content"></div>
+    
+    <div class="footer">
+        <p>© 2025 色谱柱查询系统 | 实验室设备管理系统</p>
+    </div>
+
+    <script>
+        // 色谱柱数据
+        const columnsData = {
+            "hplc": [
+                {
+                    "id": "HPLC-001",
+                    "model": "C18",
+                    "specification": "4.6×250mm, 5μm",
+                    "description": "反相色谱柱，适用于大多数有机化合物的分离",
+                    "manufacturer": "Agilent",
+                    "temperature": "室温-60℃",
+                    "pressure": "≤4000 psi"
+                },
+                {
+                    "id": "HPLC-002",
+                    "model": "C8",
+                    "specification": "4.6×150mm, 5μm",
+                    "description": "反相色谱柱，适用于中等极性化合物的分离",
+                    "manufacturer": "Waters",
+                    "temperature": "室温-60℃",
+                    "pressure": "≤4000 psi"
+                },
+                {
+                    "id": "HPLC-003",
+                    "model": "HILIC",
+                    "specification": "4.6×100mm, 3μm",
+                    "description": "亲水相互作用色谱柱，适用于极性化合物的分离",
+                    "manufacturer": "Thermo Scientific",
+                    "temperature": "室温-80℃",
+                    "pressure": "≤6000 psi"
+                },
+                {
+                    "id": "HPLC-004",
+                    "model": "Phenyl-Hexyl",
+                    "specification": "4.6×250mm, 5μm",
+                    "description": "芳香族选择性色谱柱，适用于芳香族化合物的分离",
+                    "manufacturer": "Agilent",
+                    "temperature": "室温-60℃",
+                    "pressure": "≤4000 psi"
+                },
+                {
+                    "id": "HPLC-005",
+                    "model": "Cyano",
+                    "specification": "4.6×150mm, 5μm",
+                    "description": "正相色谱柱，适用于极性化合物的分离",
+                    "manufacturer": "Waters",
+                    "temperature": "室温-60℃",
+                    "pressure": "≤4000 psi"
+                }
+            ],
+            "gc": [
+                {
+                    "id": "GC-001",
+                    "model": "DB-5",
+                    "specification": "30m×0.32mm×1μm",
+                    "description": "非极性色谱柱，适用于大多数化合物的分离",
+                    "manufacturer": "Agilent",
+                    "temperature": "-60℃~325℃",
+                    "carrierGas": "氮气或氢气"
+                },
+                {
+                    "id": "GC-002",
+                    "model": "DB-624",
+                    "specification": "30m×0.32mm×1.8μm",
+                    "description": "中等极性色谱柱，适用于挥发性有机物的分析",
+                    "manufacturer": "Agilent",
+                    "temperature": "-20℃~260℃",
+                    "carrierGas": "氮气或氢气"
+                },
+                {
+                    "id": "GC-003",
+                    "model": "HP-INNOWax",
+                    "specification": "30m×0.25mm×0.25μm",
+                    "description": "极性色谱柱，适用于醇类、酯类等极性化合物的分析",
+                    "manufacturer": "Agilent",
+                    "temperature": "20℃~250℃",
+                    "carrierGas": "氮气或氢气"
+                },
+                {
+                    "id": "GC-004",
+                    "model": "DB-1701",
+                    "specification": "30m×0.32mm×0.25μm",
+                    "description": "中等极性色谱柱，适用于农药残留分析",
+                    "manufacturer": "Agilent",
+                    "temperature": "-20℃~280℃",
+                    "carrierGas": "氮气或氢气"
+                },
+                {
+                    "id": "GC-005",
+                    "model": "HP-1",
+                    "specification": "30m×0.32mm×0.25μm",
+                    "description": "非极性色谱柱，适用于烃类化合物的分析",
+                    "manufacturer": "Agilent",
+                    "temperature": "-60℃~325℃",
+                    "carrierGas": "氮气或氢气"
+                }
+            ]
+        };
+
+        const tips = `
+            <div class="tips">
+                <i class="fas fa-search"></i>
+                <h3>色谱柱查询系统</h3>
+                <p>可查询液相色谱柱(HPLC)和气相色谱柱(GC)的详细信息</p>
+                <p>请从上方选择色谱柱类型和具体型号</p>
+            </div>
+        `;
+
+        $(() => {
+            let currentType = "hplc";
+            $("#content").html(tips);
+
+            // 选项卡切换
+            $(".tab").on("click", function() {
+                $(".tab").removeClass("active");
+                $(this).addClass("active");
+                currentType = $(this).data("type");
+                updateSelector();
+                showAllColumns();
+            });
+
+            // 更新下拉选择器
+            function updateSelector() {
+                $("#selector").empty();
+                $("#selector").append(`<option value='null' selected>请选择色谱柱型号</option>`);
+                
+                columnsData[currentType].forEach(column => {
+                    $("#selector").append(`<option value='${column.id}'>${column.model} - ${column.specification}</option>`);
+                });
+            }
+
+            // 显示所有色谱柱
+            function showAllColumns() {
+                const columns = columnsData[currentType];
+                let html = `<h2>${currentType === "hplc" ? "液相色谱柱" : "气相色谱柱"}列表</h2>`;
+                html += `<div class="column-list">`;
+                
+                columns.forEach(column => {
+                    html += `
+                        <div class="column-card ${currentType}" data-id="${column.id}">
+                            <h3>${column.model}</h3>
+                            <p><strong>编号:</strong> ${column.id}</p>
+                            <p><strong>规格:</strong> ${column.specification}</p>
+                            <p><strong>描述:</strong> ${column.description}</p>
+                        </div>
+                    `;
+                });
+                
+                html += `</div>`;
+                $("#content").html(html);
+                
+                // 添加点击事件
+                $(".column-card").on("click", function() {
+                    const id = $(this).data("id");
+                    showColumnDetails(id);
+                });
+            }
+
+            // 显示色谱柱详情
+            function showColumnDetails(id) {
+                const column = columnsData[currentType].find(col => col.id === id);
+                if (!column) return;
+                
+                let html = `
+                    <div class="column-details">
+                        <h2>${column.model} 色谱柱详情</h2>
+                        <div class="detail-item">
+                            <div class="detail-label">编号</div>
+                            <div class="detail-value">${column.id}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">型号</div>
+                            <div class="detail-value">${column.model}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">规格</div>
+                            <div class="detail-value">${column.specification}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">制造商</div>
+                            <div class="detail-value">${column.manufacturer}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">描述</div>
+                            <div class="detail-value">${column.description}</div>
+                        </div>
+                `;
+                
+                if (currentType === "hplc") {
+                    html += `
+                        <div class="detail-item">
+                            <div class="detail-label">使用温度</div>
+                            <div class="detail-value">${column.temperature}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">最大压力</div>
+                            <div class="detail-value">${column.pressure}</div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="detail-item">
+                            <div class="detail-label">使用温度</div>
+                            <div class="detail-value">${column.temperature}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">载气</div>
+                            <div class="detail-value">${column.carrierGas}</div>
+                        </div>
+                    `;
+                }
+                
+                html += `</div>`;
+                $("#content").html(html);
+            }
+
+            // 下拉选择器变化事件
+            $("#selector").on("change", function() {
+                const selectedId = $(this).val();
+                
+                if (selectedId === "null") {
+                    showAllColumns();
+                    return;
+                }
+                
+                showColumnDetails(selectedId);
+            });
+
+            // 初始化
+            updateSelector();
+            showAllColumns();
+        });
+    </script>
+</body>
+
+</html>
