@@ -86,6 +86,9 @@
             padding-bottom: 8px;
             border-bottom: 1px solid #eaecef;
             position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
         .section-title::after {
@@ -96,6 +99,21 @@
             width: 60px;
             height: 2px;
             background: #3498db;
+        }
+        
+        .refresh-btn {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.3s;
+        }
+        
+        .refresh-btn:hover, .refresh-btn:active {
+            background: #27ae60;
         }
         
         .search-box {
@@ -208,7 +226,7 @@
         }
         
         .history-section {
-            margin-top: 25px;
+            margin-bottom: 25px;
         }
         
         .history-list {
@@ -512,6 +530,17 @@
                 <div class="data-loading" id="dataLoading">正在加载词汇数据...</div>
             </div>
             
+            <!-- 将常用词汇部分移到在线翻译上面 -->
+            <div class="history-section">
+                <h2 class="section-title">
+                    常用实验室词汇
+                    <button class="refresh-btn" id="refreshBtn">刷新词汇</button>
+                </h2>
+                <div class="history-list" id="historyList">
+                    <!-- 常用词汇将动态填充 -->
+                </div>
+            </div>
+            
             <h2 class="section-title">在线翻译</h2>
             
             <div class="online-translation">
@@ -560,13 +589,6 @@
                 <div class="error-message" id="errorMessage"></div>
             </div>
             
-            <div class="history-section">
-                <h2 class="section-title">常用实验室词汇</h2>
-                <div class="history-list" id="historyList">
-                    <!-- 常用词汇将动态填充 -->
-                </div>
-            </div>
-            
             <div style="text-align: center; margin-top: 20px;">
                 <a href="../index.html" class="back-btn">返回主页面</a>
             </div>
@@ -580,6 +602,7 @@
     <script>
         // 全局变量存储实验室词汇数据
         let labVocabulary = {};
+        let currentCategory = 'all';
 
         // 初始化页面
         document.addEventListener('DOMContentLoaded', function() {
@@ -588,6 +611,7 @@
             
             // 事件监听
             document.getElementById('searchBtn').addEventListener('click', performSearch);
+            document.getElementById('refreshBtn').addEventListener('click', refreshHistory);
             
             document.getElementById('searchInput').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
@@ -606,7 +630,7 @@
 
         // 加载词汇数据
         function loadVocabularyData() {
-            fetch('../info/lab-vocabulary.json')
+            fetch('../info/English.json')
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('网络响应不正常');
@@ -642,6 +666,7 @@
             allTab.addEventListener('click', function() {
                 document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'));
                 this.classList.add('active');
+                currentCategory = 'all';
                 initHistoryList();
             });
             categoryTabs.appendChild(allTab);
@@ -655,6 +680,7 @@
                 tab.addEventListener('click', function() {
                     document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'));
                     this.classList.add('active');
+                    currentCategory = category;
                     initHistoryList(category);
                 });
                 categoryTabs.appendChild(tab);
@@ -662,7 +688,7 @@
         }
 
         // 初始化常用词汇列表
-        function initHistoryList(category = 'all') {
+        function initHistoryList(category = currentCategory) {
             const historyList = document.getElementById('historyList');
             historyList.innerHTML = '';
             
@@ -671,7 +697,7 @@
             if (category === 'all') {
                 // 获取所有分类的词汇
                 Object.values(labVocabulary).forEach(categoryWords => {
-                    words = words.concat(categoryWords.slice(0, 5)); // 每个分类取前5个
+                    words = words.concat(categoryWords);
                 });
             } else {
                 // 获取指定分类的词汇
@@ -692,6 +718,11 @@
                 });
                 historyList.appendChild(item);
             });
+        }
+
+        // 刷新常用词汇
+        function refreshHistory() {
+            initHistoryList(currentCategory);
         }
 
         // 执行搜索
@@ -792,11 +823,11 @@
             // 使用简单的模拟翻译，避免跨域问题
             setTimeout(() => {
                 if (fromLang === 'zh-CHS' && toLang === 'en') {
-                    outputText.value = "Translation: " + inputText";
+                    outputText.value = "Translation: " + inputText;
                 } else if (fromLang === 'en' && toLang === 'zh-CHS') {
                     outputText.value = "翻译结果: " + inputText;
                 } else {
-                    outputText.value = "Translation: " + inputText + " [Simulated translation between " + fromLang + " and " + toLang + "]";
+                    outputText.value = "Translation: " + inputText;
                 }
                 loadingIndicator.classList.remove('active');
             }, 1000);
