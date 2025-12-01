@@ -250,59 +250,6 @@
             word-break: break-word;
         }
 
-        .column-list {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-
-        @media (min-width: 600px) {
-            .column-list {
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            }
-        }
-
-        .column-card {
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: 15px;
-            transition: var(--transition);
-            cursor: pointer;
-            touch-action: manipulation;
-            overflow-wrap: break-word;
-            word-wrap: break-word;
-            word-break: break-word;
-        }
-
-        .column-card:hover, .column-card:active {
-            box-shadow: var(--box-shadow);
-            transform: translateY(-3px);
-        }
-
-        .column-card.hplc {
-            border-left: 4px solid var(--hplc-color);
-        }
-
-        .column-card.gc {
-            border-left: 4px solid var(--gc-color);
-        }
-
-        .column-card h3 {
-            margin-bottom: 8px;
-            color: var(--primary-dark);
-            font-size: 1.2rem;
-            overflow-wrap: break-word;
-        }
-
-        .column-card p {
-            margin-bottom: 4px;
-            color: var(--secondary-color);
-            font-size: 0.95rem;
-            overflow-wrap: break-word;
-            word-wrap: break-word;
-            word-break: break-word;
-        }
-
         /* 特别为编号添加的样式，防止溢出 */
         .column-id {
             display: inline;
@@ -417,10 +364,6 @@
                 padding: 18px;
             }
             
-            .column-list {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            }
-            
             .column-id {
                 font-size: 0.9rem;
             }
@@ -451,7 +394,14 @@
         </select>
     </div>
     
-    <div class="card" id="content"></div>
+    <div class="card" id="content">
+        <div class="tips">
+            <i class="fas fa-search"></i>
+            <h3>色谱柱查询系统</h3>
+            <p>可查询液相色谱柱(HPLC)和气相色谱柱(GC)的详细信息</p>
+            <p>请从上方选择色谱柱类型和具体型号</p>
+        </div>
+    </div>
     
     <div class="footer">
         <p>© 2025 色谱柱查询系统 | 实验室设备管理系统</p>
@@ -461,15 +411,6 @@
         // 全局变量存储色谱柱数据
         let columnsData = {};
         let currentType = "hplc";
-
-        const tips = `
-            <div class="tips">
-                <i class="fas fa-search"></i>
-                <h3>色谱柱查询系统</h3>
-                <p>可查询液相色谱柱(HPLC)和气相色谱柱(GC)的详细信息</p>
-                <p>请从上方选择色谱柱类型和具体型号</p>
-            </div>
-        `;
 
         // 格式化编号，确保在移动端正确显示
         function formatColumnId(id) {
@@ -533,15 +474,20 @@
 
         // 初始化应用
         function initApp() {
-            $("#content").html(tips);
-
             // 选项卡切换
             $(".tab").on("click", function() {
                 $(".tab").removeClass("active");
                 $(this).addClass("active");
                 currentType = $(this).data("type");
                 updateSelector();
-                showAllColumns();
+                // 切换类型时重置内容为提示信息
+                $("#content").html(`
+                    <div class="tips">
+                        <i class="fas fa-search"></i>
+                        <h3>色谱柱查询系统</h3>
+                        <p>请选择 ${currentType === "hplc" ? "液相色谱柱" : "气相色谱柱"} 的具体型号</p>
+                    </div>
+                `);
             });
 
             // 更新下拉选择器
@@ -556,48 +502,25 @@
                 }
             }
 
-            // 显示所有色谱柱
-            function showAllColumns() {
-                if (!columnsData[currentType] || columnsData[currentType].length === 0) {
-                    $("#content").html(`
-                        <div class="tips">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <h3>暂无数据</h3>
-                            <p>当前类别暂无色谱柱数据。</p>
-                        </div>
-                    `);
-                    return;
-                }
-                
-                const columns = columnsData[currentType];
-                let html = `<h2>${currentType === "hplc" ? "液相色谱柱" : "气相色谱柱"}列表</h2>`;
-                html += `<div class="column-list">`;
-                
-                columns.forEach(column => {
-                    html += `
-                        <div class="column-card ${currentType}" data-id="${column.id}">
-                            <h3>${column.model}</h3>
-                            <p><strong>编号:</strong> ${formatColumnId(column.id)}</p>
-                            <p><strong>规格:</strong> ${column.specification}</p>
-                            <p><strong>描述:</strong> ${column.description}</p>
-                        </div>
-                    `;
-                });
-                
-                html += `</div>`;
-                $("#content").html(html);
-                
-                // 添加点击事件 - 使用事件委托避免重复绑定
-                $("#content").off("click", ".column-card").on("click", ".column-card", function() {
-                    const id = $(this).data("id");
-                    showColumnDetails(id);
-                });
-            }
-
             // 显示色谱柱详情
             function showColumnDetails(id) {
                 const column = columnsData[currentType].find(col => col.id === id);
-                if (!column) return;
+                if (!column) {
+                    // 如果未找到对应色谱柱，显示错误信息
+                    $("#content").html(`
+                        <div class="tips">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>未找到色谱柱信息</h3>
+                            <p>抱歉，未找到对应的色谱柱信息，请重新选择。</p>
+                            <button id="back-to-select" class="back-btn" style="margin-top: 15px;">重新选择</button>
+                        </div>
+                    `);
+                    
+                    $("#back-to-select").on("click", function() {
+                        $("#selector").val("null").trigger("change");
+                    });
+                    return;
+                }
                 
                 let html = `
                     <div class="column-details">
@@ -618,7 +541,7 @@
                             <div class="detail-label">描述</div>
                             <div class="detail-value">${column.description}</div>
                         </div>
-                        <button id="back-btn" class="back-btn">返回列表</button>
+                        <button id="back-btn" class="back-btn">重新选择</button>
                     </div>
                 `;
                 
@@ -626,7 +549,7 @@
                 
                 // 返回按钮事件
                 $("#back-btn").on("click", function() {
-                    showAllColumns();
+                    $("#selector").val("null").trigger("change");
                 });
             }
 
@@ -635,7 +558,14 @@
                 const selectedId = $(this).val();
                 
                 if (selectedId === "null") {
-                    showAllColumns();
+                    // 如果选择"请选择色谱柱型号"，显示提示信息
+                    $("#content").html(`
+                        <div class="tips">
+                            <i class="fas fa-search"></i>
+                            <h3>色谱柱查询系统</h3>
+                            <p>请选择 ${currentType === "hplc" ? "液相色谱柱" : "气相色谱柱"} 的具体型号</p>
+                        </div>
+                    `);
                     return;
                 }
                 
@@ -644,7 +574,6 @@
 
             // 初始化
             updateSelector();
-            showAllColumns();
         }
 
         // 页面加载完成后开始加载数据
